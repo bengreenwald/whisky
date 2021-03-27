@@ -10,7 +10,11 @@ The overarching goals of this project are threefold:
 
 # Project Posts
 **Part 1**: Introduction & Building the Dataset
+<br>
 **Part 2**: Exploratory Data Analysis
+<br>
 **Part 3**: Mapping Distilleries & Regions
+<br>
 **Part 4**: Review Text Analysis
+<br>
 **Part 5**: TBD
