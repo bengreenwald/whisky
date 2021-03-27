@@ -1,0 +1,62 @@
+---
+title: "Exploring Whisky: The Journey to My Next Bottle of Scotch"
+subtitle: "Part 5: TBD"
+author: "Ben Greenwald"
+output: html_document
+---
+
+# TO-DO
+* add items.
+
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# add packages
+```
+
+```{r}
+# load data + code
+```
+
+## Part 5: TBD
+Add introduction. 
+
+## Project Goals
+As a reminder, the overarching goals of this mutli-part project are threefold:
+
+* To augment my learning about whisky brands, regions, flavors, and options
+* To understand the breadth, depth, and quirks of the scotch whisky industry
+* To leverage data to determine which whiskies I ought to try myself
+
+## Part 5 Plan TBD
+* get flavor profiles, combine with data (fuzzyjoin)
+* confirmatory analysis of part 3 in some ways: do regions have flavor profiles?
+* eventually, do cluster analysis or similarity scores related to flavor notes - which whiskeys are most similar?
+* put stuff together into a shiny app: input certain parameters, and it suggests whisky
+* be sure to prototype before deployment!
+
+```{r}
+source(here("code", "get-scotch-flavors.R"))
+```
+
+```{r}
+scotch_flavor_notes <- scotch %>% 
+  fuzzy_left_join(scotch_flavors,
+                  match_fun = ignore_case_string,
+                  by = c(whisky = "distillery_name"))
+```
+
+cool shiny app
+https://scotchgit.bitbucket.io/
+
+## Conclusions
+Add conclusions. 
+
+## Next Steps
+Add next steps.
+beyond this project, could do:
+* similar progression, but for irish whisky
+* similar progression, but for american whisky / bourbon
+* similar progression, but for japanese whisky
+* compare across different styles: if i like this scotch, which japanese is similar?
