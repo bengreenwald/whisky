@@ -2,15 +2,13 @@
 #### CUSTOM PLOT FUNCTIONS ####
 ###############################
 
-# Ridgeline Plot --------------
-
+## ---- ridgeline_plot ----
 ridgeline_plot <- function(var,
                            group = type,
                            log_trans = FALSE) {
   
   # create dynamic axis title
   axis_title <- stringr::str_to_title(rlang::ensym(var))
-  
   var <- rlang::enquo(var)
   group <- rlang::enquo(group)
   
@@ -37,7 +35,6 @@ ridgeline_plot <- function(var,
   
   # plot if no log transformation included
   if(isFALSE(log_trans)) {
-    
     rlp <- rlp + 
       scale_x_continuous(expand = c(0, 0)) + 
       labs(x = glue::glue("Distribution of {axis_title}"),
@@ -45,7 +42,6 @@ ridgeline_plot <- function(var,
     
   # plot if variable of interest is log transformed   
   } else {
-
     rlp <- rlp + 
       scale_x_continuous(expand = c(0, 0),
                          trans = "log10",
@@ -53,15 +49,11 @@ ridgeline_plot <- function(var,
                          labels = scales::trans_format("log10", scales::math_format(10^.x))) + 
       labs(x = glue::glue("Distribution of Log({axis_title})"),
            y = "")
-  
   }
-  
   rlp
-
 }
 
-# Hex Plot --------------
-
+## ---- hex_plot ----
 hex_plot <- function(x,
                      y,
                      log_trans = NULL) {
@@ -69,7 +61,6 @@ hex_plot <- function(x,
   # create dynamic axis titles
   x_axis_title <- stringr::str_to_title(rlang::ensym(x))
   y_axis_title <- stringr::str_to_title(rlang::ensym(y))
-    
   x <- rlang::enquo(x)
   y <- rlang::enquo(y)
   
@@ -91,16 +82,13 @@ hex_plot <- function(x,
   
   # plot if no log transformation included
   if(is.null(log_trans)) {
-    
     hxp +
       labs(x = x_axis_title,
            y = y_axis_title)
   
   } else {
-    
     # plot if x-axis variable is log transformed     
     if(log_trans == rlang::ensym(x)) {
-      
       hxp + 
         scale_x_continuous(trans = "log10",
                            breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -110,24 +98,18 @@ hex_plot <- function(x,
       
     # plot if x-axis variable is log transformed       
     } else {
-      
       hxp + 
         scale_y_continuous(trans = "log10",
                            breaks = scales::trans_breaks("log10", function(x) 10^x),
                            labels = scales::trans_format("log10", scales::math_format(10^.x))) +
         labs(x = x_axis_title,
              y = glue::glue("Log({y_axis_title})"))
-      
     }
-    
   }
-  
 }
 
-# Q-Q Plot --------------
-
+## ---- qq_plot ----
 draw_qq_plot <- function(var) {
- 
   var <- rlang::enquo(var)
   
   # filter the data
@@ -141,5 +123,4 @@ draw_qq_plot <- function(var) {
            add = "qqline",
            color = wky_brown,
            ggtheme = theme_bg())
-   
 }

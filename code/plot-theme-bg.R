@@ -2,8 +2,7 @@
 #### CUSTOM GGPLOT THEMES ####
 ##############################
 
-# theme_bg() -----------------
-
+## ---- theme_bg ----
 theme_bg <- function () { 
   theme_minimal(base_family = "Roboto") %+replace% 
     theme(
@@ -40,8 +39,7 @@ theme_bg <- function () {
     )
 }
 
-# theme_bg_dark() ------------
-
+## ---- theme_bg_dark ----
 theme_bg_dark <- function () { 
   theme_minimal(base_family = "Roboto") %+replace% 
     theme(
