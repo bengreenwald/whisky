@@ -12,12 +12,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
-# add packages
-```
-
-```{r}
-# load data + code
 ```
 
 ## Part 4: Review Text Analysis

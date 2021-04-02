@@ -11,12 +11,6 @@ output: html_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
-# add packages
-```
-
-```{r}
-# load data + code
 ```
 
 ## Part 5: TBD
@@ -35,17 +29,6 @@ As a reminder, the overarching goals of this mutli-part project are threefold:
 * eventually, do cluster analysis or similarity scores related to flavor notes - which whiskeys are most similar?
 * put stuff together into a shiny app: input certain parameters, and it suggests whisky
 * be sure to prototype before deployment!
-
-```{r}
-source(here("code", "get-scotch-flavors.R"))
-```
-
-```{r}
-scotch_flavor_notes <- scotch %>% 
-  fuzzy_left_join(scotch_flavors,
-                  match_fun = ignore_case_string,
-                  by = c(whisky = "distillery_name"))
-```
 
 cool shiny app
 https://scotchgit.bitbucket.io/
