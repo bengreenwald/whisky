@@ -11,14 +11,14 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
-                      results = "show", cache = FALSE, autodep = FALSE)
-knitr::opts_knit$set(root.dir = "external-data/whisky")
+#knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+#                      results = "show", cache = FALSE, autodep = FALSE)
+#knitr::opts_knit$set(root.dir = "external-data/whisky")
 ```
 
-```{r}
-here::i_am("analysis/scotch-analysis-part1.R")
-source(here::here("analysis", "scotch-analysis-part1.R"))
+```{r, include=FALSE}
+#here::i_am("analysis/scotch-analysis-part1.R")
+#source(here::here("analysis", "scotch-analysis-part1.R"))
 ```
 
 ## Part 1: Introduction & Building the Dataset

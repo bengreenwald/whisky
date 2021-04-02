@@ -9,8 +9,16 @@ output: html_document
 * add items.
 
 ---
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+#                      results = "show", cache = FALSE, autodep = FALSE)
+#knitr::opts_knit$set(root.dir = "external-data/whisky")
+```
+
+```{r, include=FALSE}
+#here::i_am("analysis/scotch-analysis-part5.R")
+#source(here::here("analysis", "scotch-analysis-part.R"))
 ```
 
 ## Part 5: TBD

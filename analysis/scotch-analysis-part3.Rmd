@@ -21,28 +21,22 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-if(!require("pacman")) {install.packages("pacman")}
-pacman::p_load(here, # project workflow
-               tidyverse, # reshaping + plotting the data
-               ggtext, # custom ggplot formatting
-               plotly) # interactive plots
+#knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+#                      results = "show", cache = FALSE, autodep = FALSE)
+#knitr::opts_knit$set(root.dir = "external-data/whisky")
 ```
 
 ```{r, include=FALSE}
-scotch <- read_rds(here("data", "scotch-ratings-distilleries.rdata")) # load data without duplicates
-scotch_with_collabs <- read_rds(here("data", "scotch-ratings-distilleries-with-collabs.rdata")) # load data with collaborations
-source(here("code", "color-palettes.R")) # custom color palettes for analyses
-source(here("code", "plot-theme-bg.R")) # custom ggplot theme
+#here::i_am("analysis/scotch-analysis-part3.R")
+#source(here::here("analysis", "scotch-analysis-part3.R"))
 ```
 
 ## Part 3: Mapping Distilleries & Regions
 Welcome to the next installment of **Exploring Whisky: The Journey to My Next Bottle of Scotch**, a multi-part project in which I leverage data to share fun facts about whisky as I continue my hopeful search to discover delicious scotch. 
 
-Previously in [Part 1](PAGE/GITHUB LINK), we built our dataset from scratch by scraping scotch whisky reviews, prices, brands, regional locations, and more from [Whisky Advocate](https://www.whiskyadvocate.com/ratings-and-reviews/), Wikipedia ([1](https://en.wikipedia.org/wiki/List_of_whisky_distilleries_in_Scotland), [2](https://en.wikipedia.org/wiki/Category:Distilleries_in_Scotland), [3](https://en.wikipedia.org/wiki/Category:Blended_Scotch_whisky)), and [whisky.com](https://www.whisky.com/whisky-database/database.html). Then in [Part 2](PAGE/GITHUB LINK), we explored the distributions of and relationships between variables including whisky `type`, `age`, `ABV`, `price`, and rating `points`.
+Previously in [Part 1](https://www.google.com/), we built our dataset from scratch by scraping scotch whisky reviews, prices, brands, regional locations, and more from [Whisky Advocate](https://www.whiskyadvocate.com/ratings-and-reviews/), Wikipedia ([1](https://en.wikipedia.org/wiki/List_of_whisky_distilleries_in_Scotland), [2](https://en.wikipedia.org/wiki/Category:Distilleries_in_Scotland), [3](https://en.wikipedia.org/wiki/Category:Blended_Scotch_whisky)), and [whisky.com](https://www.whisky.com/whisky-database/database.html). Then in [Part 2](https://www.google.com/), we explored the distributions of and relationships between variables including whisky `type`, `age`, `ABV`, `price`, and rating `points`.
 
-Next, [Part 3](PAGE/GITHUB LINK)...short description about brands, regions, mapping. 
+Next, [Part 3](https://github.com/bengreenwald/whisky/blob/main/analysis/scotch-analysis-part3.R)...short description about brands, regions, mapping. 
 
 ## Project Goals
 As a reminder, the overarching goals of this mutli-part project are threefold:
@@ -54,11 +48,7 @@ As a reminder, the overarching goals of this mutli-part project are threefold:
 ## Mapping Distilleries & Regions
 INTRO TEXT FOR PART 3
 
-```{r, echo=FALSE}
-scotch %>% 
-  select(whisky, distillery, region, lat, long) %>% 
-  glimpse()
-```
+**{glimpse_data}**
 
 ### Guiding Questions
 * Which brands release the most expensive and/or highly-rated whiskies?
@@ -83,43 +73,7 @@ Rating points proved much less unruly and were safely averaged here. As a remind
 * 75-79 points - **Mediocre**: *a drinkable whisky that may have minor flaws*
 * 50-74 points - **Not Recommended**
 
-```{r, echo=FALSE}
-brands <- scotch_with_collabs %>% 
-  filter(!is.na(distillery)) %>% 
-  group_by(distillery, region) %>% 
-  summarise(Releases = n(),
-            `Median Price` = median(price),
-            `Average Points` = round(mean(points), 2)) %>% 
-  rename(Distillery = distillery,
-         Region = region) %>% 
-  mutate(Region = ifelse(is.na(Region), "No Region", Region))
-
-# create ggplot base visualization 
-brand_plot <- brands %>% 
-  filter(Distillery != "Ladyburn") %>% 
-  ggplot(aes(x = `Median Price`,
-             y = `Average Points`,
-             size = Releases,
-             color = Region,
-             text = glue::glue("Distillery: {Distillery}"))) + 
-  geom_point(alpha = 0.8) + 
-  scale_color_manual(values = c(sco_khaki,
-                                sco_green, 
-                                sco_magenta,
-                                sco_blue, 
-                                sco_brown, 
-                                wky_orange,
-                                sco_lime)) + 
-  labs(x = "Median Price ($)",
-       y = "Average Points (50-100)") +
-  theme_bg() + 
-  theme(legend.title = element_blank())
-
-# Plotly interactive plot with title and subtitle left-justified
-ggplotly(brand_plot) %>% 
-  layout(title = list(text = "<b> Which distilleries are the most profilic, expensive, and highly regarded? </b> <br> <sup> <i> Size of bubbles indicates the number of whisky releases by scotch brand. </i> </sup>",
-                      x = 0))
-```
+**{brand_plotly}**
 
 Observing distilleries across all regions together, most brands cluster together between a median price of \$50-200 and an average rating points of 84-90, indicating that there are plenty of affordable "Very Good" scotches out there to explore. Some brands notably outside of the cluster include: 
 
@@ -141,13 +95,6 @@ The remaining four regions (Islay, Island, Lowland, and Campbeltown) only have a
 
 The most prolific brands in the Lowlands region such as Auchentoshan and Bladnoch are tightly clustered around 85 average points and a \$100 median price, while other boutique brands such as Daftmill, Ailsa Bay, and Leven have 1-2 releases each at the extremes of price and rating. In the Islands region, Abhainn Dearg stands out from the pack with one whisky release that is far more expensive (\$239) than its rating of 81 would suggest. Lastly, the once bustling scotch region of Campbeltown only has three remaining brands to carry forward its history after many distilleries were shuttered nearly a century ago after decades of mass-produced, subpar scotch peddled by distillers in the area willing to cut corners. 
 
-```{r}
-scotch_with_collabs %>% 
-  filter(!is.na(distillery) & is.na(region)) %>% 
-  group_by(distillery) %>% 
-  tally()
-```
-
 NEED TO COMMENT ON THE DISTILLERIES WITH NO REGION AVAILABLE - these brands are either primarily blended or independent bottlers
 they don't really have distilleries, per se - they seem to have shops and visitor centers, but they are usually distilling at someone else's - how to handle these moving forward????
 * Johnnie Walker @ Cardhu
@@ -161,11 +108,7 @@ they don't really have distilleries, per se - they seem to have shops and visito
 * Haig is now Cameron Bridge, and they do Single Grain
 * William Grant & Sons owns Glenfiddich, Balvenie, others - and House of Hazelwood is a sub-brand
 * Black Bottle + Buchanan's are just blended brands, can't find out much
-
-```{r}
-scotch %>% 
-  filter(is.na(distillery))
-```
+.na(distillery))
 
 Would recommend looking into some of the most common brands here as well - who are they?
 wemyss, trader joe's, shieldaig, why are they not on whisky.com
@@ -173,45 +116,9 @@ wemyss, trader joe's, shieldaig, why are they not on whisky.com
 ### Regions
 **Which regions produce the most highly-rated whiskies?**
 
-```{r, include=FALSE}
-regions <- scotch_with_collabs %>% 
-  filter(!is.na(region)) %>% 
-  group_by(region) %>% 
-  summarise(releases = n()) %>% 
-  mutate(perc = scales::percent(releases/sum(releases)))
-```
-
 [Scotch whisky regions are not exactly standardized](https://www.whiskyadvocate.com/scotch-regions-list/) or commonly recognized across the industry, but there are generally considered to be six different regions, each of which boasts a distinct whisky style and sensibility: Speyside, Highland, Lowland, Islay, Islands, and Campbeltown. In these data where regional information was available, over 80% of the whisky releases come from Speyside, Highland, and Islay distilleries.
 
-```{r, echo=FALSE}
-scotch_with_collabs %>% 
-  filter(!is.na(region)) %>% 
-  ggplot(aes(x = points, 
-             y = reorder(region, 
-                         points, 
-                         FUN = max), 
-             fill = region)) + 
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75),
-              alpha = 0.8) + 
-  scale_fill_manual(values = c(sco_khaki,
-                               sco_green, 
-                               sco_magenta,
-                               sco_blue, 
-                               sco_brown, 
-                               sco_lime)) + 
-  labs(title = "Which region produces the most highly-rated scotch?",
-       subtitle = "Vertical lines inside violins represent 25th, 50th, and 75th quartiles.",
-       x = "Distribution of Rating Points",
-       y = "") + 
-  theme_bg() + 
-  theme(legend.position = "none")
-
-# customize violin/boxplot
-# better scale at the bottom with more numbers
-# reorder by some value - figure that out
-# consider price or log(price) instead - if i do this, then change guiding question
-# https://ggplot2.tidyverse.org/reference/geom_violin.html
-```
+**{region_violin}**
 
 * highland with the very long tail
 * speyside and islay leading the pack (not surprising...why)?
@@ -229,7 +136,6 @@ Add conclusion.
 Add next steps.
 
 ## Resources
-
 https://kb.tableau.com/articles/howto/plotting-geographic-data-using-custom-longitude-and-latitude
 
 Fuzzy join with a partial string match. 
