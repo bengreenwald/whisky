@@ -42,6 +42,10 @@ benchmark_table <- scotch %>%
   # interactive table, remove unnecessary table features
   DT::datatable(options = list(dom = 't'))
 
+htmlwidgets::saveWidget(benchmark_table,
+                        file = "output/benchmark_table.html",
+                        selfcontained = TRUE)
+
 ## ---- type ----
 # data for pictogram plot
 types <- scotch %>% 
@@ -123,8 +127,9 @@ age_plotly <- ggplotly(age_plot, tooltip = c("x", "y")) %>%
   layout(title = list(text = "<b> Distilleries overwhelming offer 12 year old scotch whiskies. </b> <br> <sup> <i> 10/15/18/21 years are also common, with specialty releases often starting at 25 years in increments of five. </i> </sup>",
                       x = 0.5))
 
-# create HTML object to center plot on page
-age_html <- htmltools::div(age_plotly, align = "center")
+htmlwidgets::saveWidget(age_plotly,
+                        file = "output/age_plotly.html",
+                        selfcontained = TRUE)
 
 ## ---- ABV ----
 ABV_ridge <- ridgeline_plot(ABV, type) + 
@@ -160,6 +165,10 @@ pct_expensive_table <- scotch %>%
   # interactive table, remove unnecessary features
   DT::datatable(options = list(dom = 't'))
 
+htmlwidgets::saveWidget(pct_expensive_table,
+                        file = "output/pct_expensive_table.html", 
+                        selfcontained = TRUE)
+
 expensive_blend_table <- scotch %>% 
   arrange(price) %>% 
   filter(price >= 1000 & type == "Blended Scotch Whisky") %>% 
@@ -169,6 +178,10 @@ expensive_blend_table <- scotch %>%
   rename_with(~str_to_title(.)) %>%
   # interactive table, remove unnecessary features, show all rows
   DT::datatable(options = list(dom = 't', pageLength = 13))
+
+htmlwidgets::saveWidget(expensive_blend_table,
+                        file = "output/expensive_blend_table.html", 
+                        selfcontained = TRUE)
 
 ## ---- price_comparison ----
 glenfiddich_12_price <- scotch %>% 
@@ -201,6 +214,10 @@ low_points_table <- scotch %>%
                                columnDefs = list(list(width = '150px',
                                                       targets = 1)),
                                pageLength = 5))
+
+htmlwidgets::saveWidget(low_points_table,
+                        file = "output/low_points_table.html",
+                        selfcontained = TRUE)
 
 ## ---- qq_plots ----
 # draw individual q-q plots

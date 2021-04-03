@@ -56,6 +56,10 @@ brand_plot <- brands %>%
 brand_plotly <- ggplotly(brand_plot) %>% 
   layout(title = list(text = "<b> Which distilleries are the most profilic, expensive, and highly regarded? </b> <br> <sup> <i> Size of bubbles indicates the number of whisky releases by scotch brand. </i> </sup>", x = 0))
 
+htmlwidgets::saveWidget(brand_plotly,
+                        file = "output/brand_plotly.html", 
+                        selfcontained = TRUE)
+
 # researching which distilleries are not included - what happened?
 #scotch_with_collabs %>% 
 #  filter(!is.na(distillery) & is.na(region)) %>% 
