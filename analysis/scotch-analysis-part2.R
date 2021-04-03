@@ -93,7 +93,7 @@ type_pictogram <- types %>%
         plot.subtitle = element_markdown(hjust = 0.5),
         plot.margin = grid::unit(c(15, 10, 7.5, 10), "pt"))
 
-## ---- age ----
+ ## ---- age ----
 age_data <- scotch %>%
   rename(Age = age) %>% 
   filter(!is.na(Age)) %>% 
