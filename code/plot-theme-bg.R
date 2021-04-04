@@ -104,5 +104,5 @@ theme_gt <- function(data, ...){
     tab_options(table.background.color = "#e9e9e9",
                 data_row.padding = px(5),
                 ...) %>% 
-    opt_row_striping(data, row_striping = FALSE)
+    opt_row_striping(row_striping = FALSE)
 }
