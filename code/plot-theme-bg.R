@@ -84,7 +84,7 @@ theme_bg_dark <- function () {
 }
 
 ## ---- theme_bg_dark ----
-theme_gt <- function(data){
+theme_gt <- function(data, ...){
   data %>%
     # style column labels
     tab_style(style = list(cell_text(weight = "bold",
@@ -101,5 +101,7 @@ theme_gt <- function(data){
                                    weight = px(1)),
               locations = cells_column_labels(columns = everything())) %>% 
     opt_table_outline() %>% 
-    tab_options(data_row.padding = px(5))
+    tab_options(table.background.color = "#e9e9e9",
+                data_row.padding = px(5),
+                ...)
 }
