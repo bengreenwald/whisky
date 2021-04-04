@@ -26,6 +26,31 @@ glimpse_data <- scotch %>%
   glimpse()
 
 ## ---- benchmark_whiskies ----
+benchmark_table_test <- scotch %>% 
+  filter(whisky %in% c("Glengoyne 21 year old", 
+                       "Glenfiddich 12 year old")) %>% 
+  select(whisky,
+         region, 
+         type,
+         ABV,
+         price,
+         points,
+         description) %>% 
+  # nicer column labels
+  rename_with(~str_to_title(.),
+              -ABV)
+
+benchmark_react <- reactable::reactable(benchmark_table_test,
+                     columns = list(
+                       Whisky = reactable::colDef(width = 100),
+                       Region = reactable::colDef(width = 80),
+                       Type = reactable::colDef(width = 75),
+                       ABV = reactable::colDef(width = 50),
+                       Price = reactable::colDef(width = 60),
+                       Points = reactable::colDef(width = 60)
+                     ),
+                     fullWidth = TRUE)
+
 benchmark_table <- scotch %>% 
   filter(whisky %in% c("Glengoyne 21 year old", 
                        "Glenfiddich 12 year old")) %>% 
