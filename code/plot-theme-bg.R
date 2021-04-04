@@ -104,14 +104,5 @@ theme_gt <- function(data, ...){
     tab_options(table.background.color = "#222222",
                 data_row.padding = px(5),
                 ...) %>% 
-    opt_row_striping(row_striping = FALSE) %>% 
-    # custom css for table background, column header alignment
-    opt_css(css = "
-    #one .gt_table {
-      background-color: #e9e9e9;
-    }
-    #one .gt_col_heading {
-      text-align: center !important;
-    }
-    ", add = TRUE)
+    opt_row_striping(row_striping = FALSE)
 }
