@@ -11,6 +11,7 @@ pacman::p_load(here, # project workflow
 ## ---- load_data ----
 scotch <- read_rds(here("data", "scotch-ratings-distilleries.rdata")) # load the data
 source(here("code", "color-palettes.R")) # custom color palettes
+source(here("code", "plot-theme-bg.R")) # custom ggplot theme
 
 ## ---- variable_table ----
 # create inline code using markdown
@@ -38,20 +39,13 @@ var_descriptions <- c("name of whisky release",
 # create table data                    
 var_table <- tibble(Variable = var_names,
                     Description = var_descriptions) %>% 
-  # create variable description table  
   gt() %>% 
+  theme_gt() %>% 
   # markdown format for variable styling
   fmt_markdown(columns = vars(Variable)) %>% 
   # cell text and color styling
-  tab_style(style = list(cell_text(weight = "bold"),
-                         cell_fill(color = wky_yellow)),
-            locations = cells_column_labels(columns = everything())) %>% 
   tab_style(style = list(cell_text(weight = "bold")),
             locations = cells_body(columns = vars(Variable))) %>% 
-  tab_style(style = cell_borders(sides = "right", 
-                                 color = wky_yellow, 
-                                 weight = px(2)),
-            locations = cells_body(columns = vars(Variable))) %>%
   # adjust column widths and alignment
   cols_width("Variable" ~ px(225),
              "Description" ~ px(600)) %>% 
@@ -60,11 +54,7 @@ var_table <- tibble(Variable = var_names,
   # add footnote
   tab_footnote(footnote = md("Learn more about [Whisky Advocate's rating scale](https://www.whiskyadvocate.com/ratings-and-reviews/)."),
                locations = cells_body(columns = vars(Description),
-                                      rows = 2)) %>% 
-  # add striping and divider line
-  opt_row_striping() %>% 
-  opt_table_outline() %>% 
-  tab_options(data_row.padding = px(5))
+                                      rows = 2))
 
 ## ---- glimpse_data ----
 glimpse_full <- glimpse(scotch)

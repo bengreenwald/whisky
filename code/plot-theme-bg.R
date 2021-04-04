@@ -82,3 +82,24 @@ theme_bg_dark <- function () {
                                   colour = "gray90")
     )
 }
+
+## ---- theme_bg_dark ----
+theme_gt <- function(data){
+  data %>%
+    # style column labels
+    tab_style(style = list(cell_text(weight = "bold",
+                                     color = wky_yellow),
+                           cell_fill(color = wky_brown)),
+              locations = cells_column_labels(columns = everything())) %>% 
+    # add cell & table borders
+    tab_style(style = cell_borders(sides = "right", 
+                                   color = "#d9d9d9", 
+                                   weight = px(1)),
+              locations = cells_body(columns = everything())) %>% 
+    tab_style(style = cell_borders(sides = "right", 
+                                   color = "#d9d9d9", 
+                                   weight = px(1)),
+              locations = cells_column_labels(columns = everything())) %>% 
+    opt_table_outline() %>% 
+    tab_options(data_row.padding = px(5))
+}

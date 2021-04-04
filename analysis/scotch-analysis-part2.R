@@ -6,6 +6,7 @@
 if(!require("pacman")) {install.packages("pacman")}
 pacman::p_load(here, # project workflow
                tidyverse, # reshaping + plotting the data
+               gt, # tables
                plotly, # interactive plots
                ggridges, # ridgeline plots
                waffle, # pictogram plot
@@ -26,31 +27,6 @@ glimpse_data <- scotch %>%
   glimpse()
 
 ## ---- benchmark_whiskies ----
-benchmark_table_test <- scotch %>% 
-  filter(whisky %in% c("Glengoyne 21 year old", 
-                       "Glenfiddich 12 year old")) %>% 
-  select(whisky,
-         region, 
-         type,
-         ABV,
-         price,
-         points,
-         description) %>% 
-  # nicer column labels
-  rename_with(~str_to_title(.),
-              -ABV)
-
-benchmark_react <- reactable::reactable(benchmark_table_test,
-                     columns = list(
-                       Whisky = reactable::colDef(width = 100),
-                       Region = reactable::colDef(width = 80),
-                       Type = reactable::colDef(width = 75),
-                       ABV = reactable::colDef(width = 50),
-                       Price = reactable::colDef(width = 60),
-                       Points = reactable::colDef(width = 60)
-                     ),
-                     fullWidth = TRUE)
-
 benchmark_table <- scotch %>% 
   filter(whisky %in% c("Glengoyne 21 year old", 
                        "Glenfiddich 12 year old")) %>% 
@@ -64,8 +40,9 @@ benchmark_table <- scotch %>%
   # nicer column labels
   rename_with(~str_to_title(.),
               -ABV) %>% 
-  # interactive table, remove unnecessary table features
-  DT::datatable(options = list(dom = 't'))
+  # create table
+  gt() %>% 
+  theme_gt()
 
 ## ---- type ----
 # data for pictogram plot
@@ -179,8 +156,12 @@ pct_expensive_table <- scotch %>%
                                          accuracy = 0.1)) %>% 
   rename(Type = type) %>% 
   arrange(desc(Over_1000)) %>% 
-  # interactive table, remove unnecessary features
-  DT::datatable(options = list(dom = 't'))
+  ungroup() %>% 
+  # create table
+  gt() %>% 
+  theme_gt() %>% 
+  cols_align(align = c("center"),
+             columns = "Pct_Expensive")
 
 expensive_blend_table <- scotch %>% 
   arrange(price) %>% 
@@ -189,8 +170,11 @@ expensive_blend_table <- scotch %>%
   select(whisky, price, points) %>% 
   # nicer column labels
   rename_with(~str_to_title(.)) %>%
-  # interactive table, remove unnecessary features, show all rows
-  DT::datatable(options = list(dom = 't', pageLength = 13))
+  # create table
+  gt() %>% 
+  theme_gt() %>% 
+  cols_align(align = c("right"),
+             columns = "Price")
 
 ## ---- price_comparison ----
 glenfiddich_12_price <- scotch %>% 
@@ -218,11 +202,13 @@ low_points_table <- scotch %>%
   select(whisky, points, description) %>% 
   arrange(points) %>% 
   rename_with(~str_to_title(.)) %>%  # nicer column labels
-  DT::datatable(options = list(dom = 'Bfrtip',  # unnecessary table features
-                               autoWidth = TRUE, # wider whisky column
-                               columnDefs = list(list(width = '150px',
-                                                      targets = 1)),
-                               pageLength = 5))
+  # create table
+  gt() %>% 
+  theme_gt() %>% 
+  cols_width("Whisky" ~ px(200),
+             "Description" ~ px(800)) %>% 
+  cols_align(align = c("center"),
+             columns = "Points")
 
 ## ---- qq_plots ----
 # draw individual q-q plots
