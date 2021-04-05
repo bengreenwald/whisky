@@ -49,7 +49,7 @@ var_table <- tibble(Variable = var_names,
   # adjust column widths and alignment
   cols_width("Variable" ~ px(225),
              "Description" ~ px(600)) %>% 
-  cols_align(align = "right",
+  cols_align(align = "center",
              columns = vars(Variable)) %>% 
   # add footnote
   tab_footnote(footnote = md("Learn more about [Whisky Advocate's rating scale](https://www.whiskyadvocate.com/ratings-and-reviews/)."),
