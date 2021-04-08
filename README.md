@@ -9,12 +9,12 @@ The overarching goals of this project are threefold:
 * To leverage data to determine which whiskies I ought to try myself
 
 # Project Posts
-**Part 1**: Introduction & Building the Dataset
+**Part 1**: [Introduction & Building the Dataset](https://bengreenwald.io/project/exploring-whisky-scotch-part1/)
 <br>
-**Part 2**: Exploratory Data Analysis
+**Part 2**: [Exploratory Data Analysis](https://bengreenwald.io/project/exploring-whisky-scotch-part2/)
 <br>
-**Part 3**: Mapping Distilleries & Regions
+**Part 3**: Coming Soon!
 <br>
-**Part 4**: Review Text Analysis
+**Part 4**: Coming Soon!
 <br>
-**Part 5**: TBD
+**Part 5**: Coming Soon!
