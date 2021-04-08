@@ -117,8 +117,14 @@ age_plot <- age_data %>%
   labs(x = "Age (in years)",
        y = "Number of Releases") + 
   theme_bg() + 
-  theme(legend.position = "none",
-        plot.title = element_markdown())
+  theme(legend.position = "none")
+
+# with title
+age_plot_title <- age_plot + 
+  labs(title = "Distilleries overwhelming offer <span style = 'color:#EC7014;'>12 year old</span> scotch whiskies.",
+       subtitle = "Whiskies aged <b style = 'color:#EC7014;'>10, 15, 18, and 21 years</b> are also very common, with specialty<br>releases often starting at <b style = 'color:#EC7014;'>25 years</b> and increasing in increments of five.") + 
+  theme(plot.title = element_markdown(),
+        plot.subtitle = element_markdown())
 
 # interactive plot using plotly 
 age_plotly <- ggplotly(age_plot, tooltip = c("x", "y")) %>% 
