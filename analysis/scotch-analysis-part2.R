@@ -127,7 +127,10 @@ age_plot_title <- age_plot +
         plot.subtitle = element_markdown())
 
 # interactive plot using plotly 
-age_plotly <- ggplotly(age_plot, tooltip = c("x", "y")) %>% 
+age_plotly <- ggplotly(age_plot,
+                       tooltip = c("x", "y"),
+                       width = 800,
+                       height = 450) %>% 
   layout(title = list(text = "<b> Distilleries overwhelming offer 12 year old scotch whiskies. </b> <br> <sup> <i> 10/15/18/21 years are also common, with specialty releases often starting at 25 years in increments of five. </i> </sup>",
                       x = 0.5))
 
