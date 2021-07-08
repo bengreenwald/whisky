@@ -13,7 +13,7 @@ The overarching goals of this project are threefold:
 <br>
 **Part 2**: [Exploratory Data Analysis](https://bengreenwald.io/project/exploring-whisky-scotch-part2/)
 <br>
-**Part 3**: Coming Soon!
+**Part 3**: [Mapping Distilleries & Regions](https://bengreenwald.io/project/exploring-whisky-scotch-part3/)
 <br>
 **Part 4**: Coming Soon!
 <br>
