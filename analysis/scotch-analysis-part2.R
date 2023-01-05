@@ -1,32 +1,33 @@
 #########################################
-#### EXPLORING WHISKY: SCOTCH PART 2 ####
+#### EXPLORING SCOTCH WHISKY: PART 2 ####
 #########################################
 
-## ---- load_packages ----
-if(!require("pacman")) {install.packages("pacman")}
-pacman::p_load(here, # project workflow
-               tidyverse, # reshaping + plotting the data
-               gt, # tables
-               plotly, # interactive plots
-               ggridges, # ridgeline plots
-               waffle, # pictogram plot
-               ggtext, # custom ggplot formatting
-               ggpubr, # Q-Q plots
-               GGally) # visualizing correlations
+# ---- load_packages ----
+pacman::p_load(
+  here, # project workflow
+  tidyverse, # reshaping + plotting the data
+  gt, # generating tables
+  webshot2, # saving tables as pngs
+  ggridges, # ridgeline plots
+  waffle, # pictogram plot
+  ggtext, # custom ggplot formatting
+  ggpubr, # Q-Q plots
+  GGally # visualizing correlations
+)
 
-## ---- load_data ----
+# ---- load_data ----
 scotch <- read_rds(here("data", "scotch-ratings-distilleries.rdata")) # load data without dupes
 source(here("code", "color-palettes.R")) # custom color palettes for analyses
-source(here("code", "load-fonts-glyphs.R")) # access special fonts and glyphs for pictogram viz
+#source(here("code", "load-fonts-glyphs.R")) # access special fonts and glyphs for pictogram viz
 source(here("code", "plot-theme-bg.R")) # custom ggplot theme
 source(here("code", "plot-functions.R")) # functions for ridgeline and hex plots
 
-## ---- data_glimpse ----
-glimpse_data <- scotch %>% 
+# ---- data_glimpse ----
+scotch %>% 
   select(whisky, type, age, ABV, price, points) %>% 
   glimpse()
 
-## ---- benchmark_whiskies ----
+# ---- benchmark_whiskies ----
 benchmark_table <- scotch %>% 
   filter(whisky %in% c("Glengoyne 21 year old", 
                        "Glenfiddich 12 year old")) %>% 
@@ -42,60 +43,69 @@ benchmark_table <- scotch %>%
               -ABV) %>% 
   # create table
   gt() %>% 
-  theme_gt()
+  theme_gt() %>% 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(columns = Whisky)
+  ) %>% 
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = c(ABV, Price, Points))
+  ) %>% 
+  cols_width(
+    Whisky ~ px(100),
+    Description ~ px(400), 
+    everything() ~ px(90)
+  )
 
-## ---- type ----
-# data for pictogram plot
+gtsave(benchmark_table, here("output", "part2", "benchmark_whisky_table.png"))
+
+# ---- type ----
+# data for waffle plot
 types <- scotch %>% 
-  group_by(type) %>% 
-  summarise(count = n()) %>% 
-  mutate(waffle = count/10,
-         percent = count/sum(count)) %>% 
+  count(type, name = "count") %>% 
+  mutate(percent = count / sum(count), 
+         waffle = round(percent * 100)) %>% 
   arrange(desc(count))
-
-# create pictogram plot
-type_pictogram <- types %>%
-  ggplot(aes(label = type,
-             values = waffle)) +
-  geom_pictogram(n_rows = 10,
-                 aes(colour = type),
-                 size = 5) +
-  # style the pictogram plot + legend
-  scale_color_manual(name = NULL,
-                     values = c(wky_yellow,
-                                wky_orange,
-                                wky_brown),
-                     labels = c("Blended Malt\nScotch Whisky",
-                                "Blended Scotch\nWhisky",
-                                "Single Malt\nScotch"),
-                     guide = guide_legend(reverse = TRUE)) +
-  scale_label_pictogram(name = NULL,
-                        values = c("glass-whiskey",
-                                   "glass-whiskey",
-                                   "glass-whiskey"),
-                        labels = c("Blended Malt\nScotch Whisky",
-                                   "Blended Scotch\nWhisky",
-                                   "Single Malt\nScotch"),
-                        guide = guide_legend(reverse = TRUE)) + 
+# create waffle plot
+type_waffle <- types %>% 
+  ggplot(aes(fill = type, 
+             values = waffle)) + 
+  geom_waffle(n_rows = 20, 
+              size = 1, 
+              color = "white", 
+              flip = TRUE) + 
+  # style the waffle plot + legend
+  scale_fill_manual(name = NULL,
+                    values = c(wky_yellow,
+                               wky_orange,
+                               wky_brown),
+                    labels = c("Blended Malt\nScotch Whisky",
+                               "Blended Scotch\nWhisky",
+                               "Single Malt\nScotch"),
+                    guide = guide_legend(reverse = TRUE)) +
   # ggtext package for custom html/markdown formatting in title and subtitle
   labs(title = "<span style = 'color:#8C2D04;'>Over 80%</span> of scotch whiskies reviewed are classified as <span style = 'color:#8C2D04;'>Single Malt Scotch</span>.",
-       subtitle = "**1** tumbler glass = **10** releases reviewed by Whisky Advocate") + 
-  # more formatting edits
-  coord_equal() +
-  theme_bg() + 
+       subtitle = "**1** square = **1%** of whisky releases reviewed by Whisky Advocate") +
+  # more formatting/design edits
+  theme_bg() +
   theme_enhance_waffle() + 
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         legend.position = "bottom",
-        legend.text = element_text(face = "bold",
-                                   margin = margin(b = 10,
-                                                   r = 25,
-                                                   unit = "pt")),
+        legend.text = element_text(
+          face = "bold",
+          margin = margin(r = 25, unit = "pt")),
         plot.title = element_markdown(hjust = 0.5),
         plot.subtitle = element_markdown(hjust = 0.5),
         plot.margin = grid::unit(c(15, 10, 7.5, 10), "pt"))
 
- ## ---- age ----
+# save plot
+ggsave(here("output", "part2", "type_waffle.png"),
+       width = 8, height = 4.5, dpi = 300)
+
+# ---- age ----
+# data for age plot
 age_data <- scotch %>%
   rename(Age = age) %>% 
   filter(!is.na(Age)) %>% 
@@ -105,7 +115,7 @@ age_data <- scotch %>%
                             "highlight", 
                             "no_highlight"))
 
-# create base plot in ggplot
+# base age plot
 age_plot <- age_data %>% 
   ggplot(aes(x = Age, 
              y = Releases, 
@@ -113,28 +123,25 @@ age_plot <- age_data %>%
   geom_col(width = 0.8, 
            alpha = 0.9) + 
   scale_fill_manual(values = c(wky_orange, 
-                               wky_brown)) + 
+                               "gray35")) + 
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) + 
   labs(x = "Age (in years)",
        y = "Number of Releases") + 
   theme_bg() + 
   theme(legend.position = "none")
 
-# with title
+# adding titles + formatting
 age_plot_title <- age_plot + 
   labs(title = "Distilleries overwhelming offer <span style = 'color:#EC7014;'>12 year old</span> scotch whiskies.",
        subtitle = "Whiskies aged <b style = 'color:#EC7014;'>10, 15, 18, and 21 years</b> are also very common, with specialty<br>releases often starting at <b style = 'color:#EC7014;'>25 years</b> and increasing in increments of five.") + 
   theme(plot.title = element_markdown(),
         plot.subtitle = element_markdown())
 
-# interactive plot using plotly 
-age_plotly <- ggplotly(age_plot,
-                       tooltip = c("x", "y"),
-                       width = 800,
-                       height = 450) %>% 
-  layout(title = list(text = "<b> Distilleries overwhelming offer 12 year old scotch whiskies. </b> <br> <sup> <i> 10/15/18/21 years are also common, with specialty releases often starting at 25 years in increments of five. </i> </sup>",
-                      x = 0.5))
+# saving plot
+ggsave(here("output", "part2", "age_plot.png"),
+       width = 8, height = 4.5, dpi = 300)
 
-## ---- ABV ----
+# ---- ABV ----
 ABV_ridge <- ridgeline_plot(ABV, type) + 
   # ggtext for special styling
   labs(title = "<span style = 'color:#EC7014;'>Blended scotch whisky</span> is usually diluted to the legal mininum: 40% ABV.",
@@ -142,10 +149,20 @@ ABV_ridge <- ridgeline_plot(ABV, type) +
        x = "Distribution of ABV") + 
   theme(plot.title = element_markdown())
 
-## ---- price_plots ----
+# saving illegible plot
+ggsave(here("output", "part2", "ABV_plot.png"),
+       width = 8, height = 4.5, dpi = 300)
+
+# ---- price_plots ----
+# illegible plot
 price_ridge <- ridgeline_plot(price, type) + 
   labs(title = "Oh no, an illegible plot!")
 
+# saving illegible plot
+ggsave(here("output", "part2", "price_illegible.png"),
+       width = 8, height = 4.5, dpi = 300)
+
+# log transformation for readability
 price_log_ridge <- ridgeline_plot(price, type, log_trans = TRUE) + 
   # ggtext for special styling
   labs(title = "<span style = 'color:#8C2D04;'>Single malt scotch</span> is generally more expensive than blended varieties.",
@@ -153,58 +170,88 @@ price_log_ridge <- ridgeline_plot(price, type, log_trans = TRUE) +
   theme(plot.title = element_markdown(),
         plot.subtitle = element_markdown())
 
-## ---- price_tables ----
+# saving the log trans plot
+ggsave(here("output", "part2", "price_log_trans.png"),
+       width = 8, height = 4.5, dpi = 300)
+
+# ---- price_tables ----
+# %expensive by type
 pct_expensive_table <- scotch %>% 
-  mutate(expensive = ifelse(price >= 1000, "Over_1000", "Under_1000")) %>% 
-  group_by(type, expensive) %>% 
-  tally() %>% 
+  mutate(expensive = ifelse(price >= 1000, 
+                            "Over $1,000", 
+                            "Under $1,000")) %>% 
+  count(type, expensive) %>% 
   pivot_wider(names_from = expensive,
               values_from = n) %>% 
-  # calculate expensive whisky by type
-  mutate(Pct_Expensive = scales::percent(Over_1000/sum(Over_1000 + Under_1000),
-                                         accuracy = 0.1)) %>% 
+  mutate(`% Expensive` = `Over $1,000` / (`Over $1,000` + `Under $1,000`)) %>% 
   rename(Type = type) %>% 
-  arrange(desc(Over_1000)) %>% 
+  arrange(desc(`Over $1,000`)) %>% 
   ungroup() %>% 
-  # create table
   gt() %>% 
   theme_gt() %>% 
-  cols_align(align = c("center"),
-             columns = "Pct_Expensive")
+  fmt_percent(columns = `% Expensive`) %>% 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(columns = `% Expensive`)
+    ) %>% 
+  cols_align(
+    align = c("center"),
+    columns = !Type
+    ) %>% 
+  cols_width(
+    Type ~ px(200),
+    everything() ~ px(150)
+    )
 
+# save table
+gtsave(pct_expensive_table, here("output", "part2", "percent_expensive_table.png"))
+
+# expensive blended whiskies
 expensive_blend_table <- scotch %>% 
-  arrange(price) %>% 
+  arrange(desc(price)) %>% 
   filter(price >= 1000 & type == "Blended Scotch Whisky") %>% 
-  mutate(price = scales::dollar(price)) %>% 
   select(whisky, price, points) %>% 
-  # nicer column labels
   rename_with(~str_to_title(.)) %>%
-  # create table
   gt() %>% 
   theme_gt() %>% 
-  cols_align(align = c("right"),
-             columns = "Price")
+  fmt_currency(columns = Price) %>% 
+  cols_align(
+    align = c("center"),
+    columns = !Whisky
+    ) %>% 
+  cols_width(
+    Whisky ~ px(350),
+    everything() ~ px(150)
+    )
 
-## ---- price_comparison ----
+# save table
+gtsave(expensive_blend_table, here("output", "part2", "expensive_blend_table.png"))
+
+# ---- price_comparison ----
+# Glenfiddich 12
 glenfiddich_12_price <- scotch %>% 
   filter(whisky == "Glenfiddich 12 year old") %>% 
   pull(price)
-
+# Glengoyne 21
 glengoyne_21_price <- scotch %>% 
   filter(whisky == "Glengoyne 21 year old") %>% 
   pull(price)
-
+# Diamond Jubilee
 diamond_jubilee_price <- scotch %>% 
   filter(whisky == "Diamond Jubilee by John Walker & Sons") %>% 
   pull(price)
 
-## ---- points ----
+# ---- points ----
+# distribution of points
 points_ridge <- ridgeline_plot(points, type) +
-  # ggtext for special styling
   labs(title = "Different types of scotch are *generally* rated similarly on Whisky Advocate.",
        subtitle = "However, the only whiskies **Not Recommended** by Whisky Advocate are <b style = 'color:#8C2D04;'>single malts</b>.") + 
   theme(plot.title = element_markdown(),
         plot.subtitle = element_markdown())
+
+# save plot
+ggsave(here("output", "part2", "points_plot.png"),
+       width = 8, height = 4.5, dpi = 300)
 
 low_points_table <- scotch %>% 
   filter(points < 75) %>% 
@@ -214,48 +261,65 @@ low_points_table <- scotch %>%
   # create table
   gt() %>% 
   theme_gt() %>% 
-  cols_width("Whisky" ~ px(200),
-             "Description" ~ px(800)) %>% 
-  cols_align(align = c("center"),
-             columns = "Points")
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(columns = Points)
+  ) %>% 
+  cols_width(
+    Whisky ~ px(200),
+    Points ~ px(100),
+    Description ~ px(650)
+    ) %>% 
+  cols_align(
+    align = c("center"),
+    columns = Points
+    )
 
-## ---- qq_plots ----
+# save table
+gtsave(low_points_table, here("output", "part2", "low_points_table.png"))
+
+# ---- qq_plots ----
 # draw individual q-q plots
-qq_age <- draw_qq_plot(age)
-qq_ABV <- draw_qq_plot(ABV)
-qq_price <- draw_qq_plot(price)
-qq_points <- draw_qq_plot(points)
-# combine plots into a 2x2 panel
-qq_grid <- ggarrange(qq_age + rremove("xlab"),
-                     qq_ABV + rremove("xlab") + rremove("ylab"), 
-                     qq_price, 
-                     qq_points + rremove("ylab"), 
-                     labels = c("Age", "ABV", "Price", "Points"),
-                     ncol = 2, 
-                     nrow = 2,
-                     label.x = 0.4,
-                     label.y = 0.9,
-                     widths = c(2,2),
-                     font.label = list(face = "bold",
-                                       family =  "Roboto"))
+qq_age <- draw_qq_plot(age) # age
+qq_ABV <- draw_qq_plot(ABV) # ABV
+qq_price <- draw_qq_plot(price) # Price
+qq_points <- draw_qq_plot(points) # Points
 
-## ---- correlations ----
+# combine plots into a 2x2 panel
+qq_grid <- ggarrange(
+  qq_age + rremove("xlab"),
+  qq_ABV + rremove("xlab") + rremove("ylab"),
+  qq_price,
+  qq_points + rremove("ylab"),
+  labels = c("Age", "ABV", "Price", "Points"),
+  ncol = 2, nrow = 2,
+  label.x = 0.4, label.y = 0.9,
+  widths = c(2,2),
+  font.label = list(face = "bold",family =  "Source Sans Pro"))
+
+# save plot
+ggsave(here("output", "part2", "qq_grid_plot.png"),
+       width = 8, height = 4.5, dpi = 300)
+
+# ---- correlations ----
 # create correlation data
 for_corr <- scotch %>% 
   select(age, ABV, price, points)
+
 # create correlation plot
-corr_plot <- ggcorr(for_corr,
-                    # correlation coefficient for non-linear data
-                    method = c("pairwise", "spearman"),
-                    # formatting and styling within ggcorr
-                    angle = 25,
-                    size = 5,
-                    color = "gray90",
-                    label = TRUE,
-                    label_round = 2,
-                    label_size = 3.5,
-                    high = wky_orange,
-                    low = sco_magenta) +
+corr_plot <- ggcorr(
+  for_corr,
+  # correlation coefficient for non-linear data
+  method = c("pairwise", "spearman"),
+  # formatting and styling within ggcorr
+  angle = 25,
+  size = 5,
+  color = "gray90",
+  label = TRUE,
+  label_round = 2,
+  label_size = 3.5,
+  high = wky_orange,
+  low = sco_magenta) +
   # adjust ggplot formatting features
   labs(title = "Correlation Coefficients",
        subtitle = "Using Spearman's Rank-Order") + 
@@ -272,32 +336,43 @@ corr_plot <- ggcorr(for_corr,
         plot.margin = margin(-50, 15, 15, 15, "pt"),
         legend.margin = margin(t = 58))
 
-## ---- hex_plots ----
+# save plot
+ggsave(here("output", "part2", "corr_plot.png"),
+       width = 7, height = 6, dpi = 300)
+
+# ---- scatterplots ----
 # age vs. price
-age_price_hex <- hex_plot(x = age, y = price, log_trans = "price") +
+age_price_scatter <- scatter_plot(x = age, y = price, log_trans = "price") +
   labs(title = "Scotch age has a strong, positive, non-linear relationship with price.")
 
+# save plot
+ggsave(here("output", "part2", "age_price_scatter.png"),
+       width = 8, height = 4.5, dpi = 300)
+
 # age vs. points
-age_points_hex <- hex_plot(x = age, y = points) + 
+age_points_scatter <- scatter_plot(x = age, y = points) + 
   labs(title = "Scotch age has a weak, positive relationship with rating points.") + 
   # add arrow + annotation
   geom_curve(aes(x = 48, 
                  y = 67, 
-                 xend = 56, 
+                 xend = 55, 
                  yend = 72.5),
              colour = "white",
              lineend = "round",
-             linejoin = "mitre",
              arrow = arrow(length = unit(0.03, "npc"))) + 
   annotate("text",
            x = 42,
            y = 67.5,
            colour = "white",
            label = "Macallan 55\nLalique",
-           face = "bold")
+           fontface = "bold")
+
+# save plot
+ggsave(here("output", "part2", "age_points_scatter.png"),
+       width = 8, height = 4.5, dpi = 300)
 
 # price vs. points
-price_points_hex <- hex_plot(x = price, y = points, log_trans = "price") + 
+price_points_scatter <- scatter_plot(x = price, y = points, log_trans = "price") + 
   labs(title = "Scotch price has a weak, positive, non-linear relationship with rating points.") + 
   # add arrow + annotation
   geom_curve(aes(x = 5000, 
@@ -306,16 +381,24 @@ price_points_hex <- hex_plot(x = price, y = points, log_trans = "price") +
                  yend = 72.5),
              colour = "white",
              lineend = "round",
-             linejoin = "mitre",
              arrow = arrow(length = unit(0.03, "npc"))) + 
   annotate("text",
            x = 2000,
            y = 67.5,
            colour = "white",
            label = "Macallan 55\nLalique",
-           face = "bold")
+           fontface = "bold")
+
+# save plot
+ggsave(here("output", "part2", "price_points_scatter.png"),
+       width = 8, height = 4.5, dpi = 300)
+
 
 # ABV vs. price
-ABV_price_hex <- hex_plot(x = ABV, y = price, log_trans = "price") + 
-  labs(title = "Scotch ABV has a weak, non-linear relationship with price.",
+ABV_price_scatter <- scatter_plot(x = ABV, y = price, log_trans = "price") + 
+  labs(title = "Scotch ABV has a weak, positive, non-linear relationship with price.",
        x = "ABV")
+
+# save plot
+ggsave(here("output", "part2", "ABV_price_scatter.png"),
+       width = 8, height = 4.5, dpi = 300)

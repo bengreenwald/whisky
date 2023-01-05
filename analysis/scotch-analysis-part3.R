@@ -1,27 +1,27 @@
 #########################################
-#### EXPLORING WHISKY: SCOTCH PART 3 ####
+#### EXPLORING SCOTCH WHISKY: PART 3 ####
 #########################################
 
-## ---- load_packages ----
-if(!require("pacman")) {install.packages("pacman")}
-pacman::p_load(here, # project workflow
-               tidyverse, # reshaping + plotting the data
-               ggtext, # custom ggplot formatting
-               plotly, # interactive plots
-               treemapify) # treemap plot
+# ---- load_packages ----
+pacman::p_load(
+  here, # project workflow
+  tidyverse, # reshaping + plotting the data
+  ggtext, # custom ggplot formatting
+  treemapify # treemap plot
+)
 
-## ---- load_data ----
+# ---- load_data ----
 scotch <- read_rds(here("data", "scotch-ratings-distilleries.rdata")) # load data without dupes
 scotch_with_collabs <- read_rds(here("data", "scotch-ratings-distilleries-with-collabs.rdata")) # load data with collaborations
 source(here("code", "color-palettes.R")) # custom color palettes for analyses
 source(here("code", "plot-theme-bg.R")) # custom ggplot theme
 
-## ---- data_glimpse ----
-glimpse_data <- scotch %>% 
+# ---- data_glimpse ----
+scotch %>% 
   select(whisky, distillery, region, lat, long) %>% 
   glimpse()
 
-## ---- regions ----
+# ---- exploring_regions ----
 # explore regional breakdown within these data
 regions <- scotch_with_collabs %>% 
   filter(!is.na(region)) %>% 
@@ -32,9 +32,9 @@ regions <- scotch_with_collabs %>%
 # combined share of data originating from speyside + highland regions
 spey_high <- regions %>% 
   filter(region %in% c("Highland", "Speyside")) %>% 
-  summarise(perc = sum(prop)) %>% 
+  summarise(perc = sum(prop) * 100) %>% 
   pull(perc) %>% 
-  scales::percent()
+  sprintf("%1.0f%%", .)
 
 # number of releases with known regions
 n_release_region <- scales::comma(sum(regions$releases))
@@ -43,7 +43,7 @@ n_release_region <- scales::comma(sum(regions$releases))
 region_treemap <- scotch_with_collabs %>% 
   filter(!is.na(region)) %>% 
   group_by(region, distillery) %>% 
-  summarise(releases = n()) %>% 
+  summarise(releases = n(), .groups = "drop") %>% 
   ggplot(aes(area = releases,
              fill = region,
              label = distillery,
@@ -62,13 +62,17 @@ region_treemap <- scotch_with_collabs %>%
                                sco_green, 
                                sco_magenta,
                                sco_blue, 
-                               sco_brown, 
+                               wky_orange, 
                                sco_lime)) +
   labs(title = glue::glue("{spey_high} of whiskies originate from the <span style = 'color:#A3B92F;'>Speyside</span> or <span style = 'color:#48652C;'>Highland</span> regions."),
-       subtitle = glue::glue("Includes {n_release_region} reviewed whisky releases out of {scales::comma(nrow(scotch_with_collabs))} with known regions")) +
+       subtitle = glue::glue("Treemap data includes {n_release_region} reviewed whisky releases with known regions out of {scales::comma(nrow(scotch_with_collabs))} total releases")) +
   theme_bg() + 
   theme(legend.position = "none",
         plot.title = element_markdown())
+
+# save plot
+ggsave(here("output", "part3", "region_treemap.png"),
+       width = 8, height = 4.5, dpi = 300)
 
 # violin plot
 region_violin <- scotch_with_collabs %>% 
@@ -80,11 +84,12 @@ region_violin <- scotch_with_collabs %>%
              fill = region)) + 
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75),
               alpha = 0.8) + 
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) + 
   scale_fill_manual(values = c(sco_khaki,
                                sco_green, 
                                sco_magenta,
                                sco_blue, 
-                               sco_brown, 
+                               wky_orange, 
                                sco_lime)) + 
   labs(title = "Which region produces the most highly-rated scotch?",
        subtitle = "Vertical lines inside violins represent 25th, 50th, and 75th quartiles.",
@@ -93,54 +98,24 @@ region_violin <- scotch_with_collabs %>%
   theme_bg() + 
   theme(legend.position = "none")
 
-## ---- distilleries ----
-brands <- scotch_with_collabs %>% 
-  filter(!is.na(distillery)) %>% 
-  group_by(distillery, region) %>% 
-  summarise(Releases = n(),
-            `Median Price` = median(price),
-            `Average Points` = round(mean(points), 2)) %>% 
-  rename(Distillery = distillery,
-         Region = region) %>% 
-  mutate(Region = ifelse(is.na(Region), "No Region", Region))
+# save plot
+ggsave(here("output", "part3", "region_violin.png"),
+       width = 8, height = 4.5, dpi = 300)
 
-# create ggplot base visualization 
-brand_plot <- brands %>% 
-  filter(Distillery != "Ladyburn") %>% 
-  ggplot(aes(x = `Median Price`,
-             y = `Average Points`,
-             size = Releases,
-             color = Region,
-             text = glue::glue("Distillery: {Distillery}"))) + 
-  geom_point(alpha = 0.8) + 
-  scale_color_manual(values = c(sco_khaki,
-                                sco_green, 
-                                sco_magenta,
-                                sco_blue, 
-                                sco_brown, 
-                                wky_orange,
-                                sco_lime)) + 
-  labs(x = "Median Price ($)",
-       y = "Average Points (50-100)") +
-  theme_bg() + 
-  theme(legend.title = element_blank())
-
-# plotly interactive plot with title and subtitle left-justified
-brand_plotly <- ggplotly(brand_plot,
-                         width = 800,
-                         height = 450) %>% 
-  layout(title = list(text = "<b> Which distilleries are the most profilic, expensive, and highly regarded? </b> <br> <sup> <i> Size of bubbles indicates the number of whisky releases by scotch brand. </i> </sup>", x = 0))
-
-# researching which distilleries are not included - what happened?
+# ---- distilleries ----
+# which distilleries have no region?
 no_regions <- scotch_with_collabs %>% 
   filter(!is.na(distillery) & is.na(region)) %>% 
   group_by(distillery) %>% 
   tally(name = "releases")
 
-## ---- mapping ----
+# data for map & scatterplot
 distillery_map <- scotch_with_collabs %>% 
   filter(!is.na(lat)) %>% 
   group_by(distillery, region, lat, long) %>% 
   summarise(releases = n(),
             median_price = median(price),
             avg_points = mean(points))
+
+# write data for tableau
+write_csv(distillery_map, here("data", "distillery-tableau-map.csv"))
